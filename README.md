@@ -7,11 +7,11 @@ as long as the network
  connection is established.
 
 Modify [`majestic.yaml`](majestic.yaml) (located in `/etc/majestic.yaml`), the `outgoing` section and enable the
-Server at host first ([`recv.sh`](recv.sh), which using
+UDP server at host first ([`recv.sh`](recv.sh)), which using
 [GStreamer](https://gstreamer.freedesktop.org/), so make sure your host have
 installed it and its plugins. see
 [*installing*](https://gstreamer.freedesktop.org/documentation/installing/index.html?gi-language=c)
-for details).
+for details.
 
 Basically [majestic](#majestic) is sending RTP stream (whose payload is H.265 or
 H.264, depends on the configuration) to the host via RTP over UDP, acting like following GStreamer pipeline:
