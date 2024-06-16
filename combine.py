@@ -3,7 +3,7 @@ from pathlib import Path
 from loguru import logger
 
 OUTPUT_DIR = Path("output")
-GRP_DIR = OUTPUT_DIR / "2024-06-15_21-31-32"
+GRP_DIR = OUTPUT_DIR / "2024-06-16_10-41-13"
 PACKET_DIR = GRP_DIR / "packet"
 RAW_DIR = GRP_DIR / "frame"
 

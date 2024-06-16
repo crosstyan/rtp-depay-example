@@ -53,7 +53,7 @@ class RTPHeader(BaseModel):
 
 
 OUTPUT_DIR = Path("output")
-GRP_DIR = OUTPUT_DIR / "2024-06-15_21-31-32"
+GRP_DIR = OUTPUT_DIR / "2024-06-16_10-36-40"
 PACKET_DIR = GRP_DIR / "packet"
 RAW_DIR = GRP_DIR / "frame"
 
@@ -125,13 +125,11 @@ def main():
     files: list[Path] = list(PACKET_DIR.glob("*.bin"))
     # sort files by name
     files.sort(key=lambda x: int(x.stem))
-    for i, payload in enumerate(stream_decode(iter_files(files))):
-        if not RAW_DIR.exists():
-            RAW_DIR.mkdir(parents=True)
-        with open(RAW_DIR / f"{i}.raw.bin", "wb") as f:
-            logger.info("{} frames written", i)
-            f.write(payload)
-
+    with open(OUTPUT_DIR / "o.265", "wb") as o:
+        HEAD = bytes([0x00, 0x00, 0x01])
+        for b in iter_files(files):
+            h, p = unwrap_rtp(b)
+            o.write(HEAD + p)
 
 if __name__ == "__main__":
     main()
