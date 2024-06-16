@@ -3,8 +3,12 @@ from enum import Enum
 from pathlib import Path
 from typing import Iterable, Optional
 
+from os import PathLike
+import click
 from loguru import logger
 from pydantic import BaseModel
+from serve import CatHeader
+from frame import HEVCNALHeader
 
 
 # https://www.iana.org/assignments/rtp-parameters/rtp-parameters.xhtml
@@ -121,7 +125,7 @@ def iter_files(pathes: Iterable[Path]):
             yield f.read()
 
 
-def main():
+def parse_files():
     files: list[Path] = list(PACKET_DIR.glob("*.bin"))
     # sort files by name
     files.sort(key=lambda x: int(x.stem))
@@ -131,5 +135,17 @@ def main():
             h, p = unwrap_rtp(b)
             o.write(HEAD + p)
 
+
+@click.command()
+@click.argument("input_file", type=click.Path(exists=True, dir_okay=False))
+def parse_cat(input_file: PathLike):
+    with open(input_file, "rb") as f:
+        data = f.read()
+    for i, cat in enumerate(CatHeader.iter_stream(data)):
+        h, b = unwrap_rtp(cat)
+        nal_header = HEVCNALHeader.from_bytes(b[:2])
+        logger.info(f"{i} len={len(b)} header=[{h}] nal=[{nal_header}]")
+
+
 if __name__ == "__main__":
-    main()
+    parse_cat()  # pylint: disable=no-value-for-parameter
