@@ -8,7 +8,7 @@ import click
 from loguru import logger
 from pydantic import BaseModel
 from serve import CatHeader
-from frame import HEVCNALHeader, can_be_passed_to_decoder
+from frame import NetworkAbstractLayerHEVC, can_be_passed_to_decoder
 
 
 # https://www.iana.org/assignments/rtp-parameters/rtp-parameters.xhtml
@@ -143,7 +143,7 @@ def parse_cat(input_file: PathLike):
         data = f.read()
     for i, cat in enumerate(CatHeader.iter_stream(data)):
         h, b = unwrap_rtp(cat)
-        nal_header = HEVCNALHeader.from_bytes(b[:2])
+        nal_header = NetworkAbstractLayerHEVC.from_bytes(b[:2])
         if can_be_passed_to_decoder(nal_header.nal_unit_type):
             logger.info(f"{i} len={len(b)} header=[{h}] nal=[{nal_header}]")
 

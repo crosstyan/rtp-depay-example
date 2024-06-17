@@ -14,6 +14,10 @@ MAGIC = bytes(map(ord, "cat"))
 
 
 class CatHeader(BaseModel):
+    """
+    Cascade Application Tarball Protocol (CAT Protocol)
+    """
+
     length: int  # uint32_t
 
     @staticmethod
@@ -24,8 +28,10 @@ class CatHeader(BaseModel):
     def unpack_cat(data: bytes):
         SZ = CatHeader.needed_bytes()
         magic, length = struct.unpack(f"!{len(MAGIC)}sI", data[:SZ])
-        assert magic == MAGIC
-        return data[SZ:SZ + length], data[SZ + length:]
+        assert (
+            magic == MAGIC
+        ), f"Invalid magic: {map(hex, magic)}!={map(hex, MAGIC)}; might be a invalid CAT packet"
+        return data[SZ : SZ + length], data[SZ + length :]
 
     @staticmethod
     def iter_stream(data: bytes):
@@ -44,21 +50,18 @@ async def main():
         logger.info(f"Creating output directory: {OUTPUT_DIR_PATH}")
         OUTPUT_DIR_PATH.mkdir()
     logger.info(f"Listening on {HOST}:{PORT}")
-    async with await create_udp_socket(family=socket.AF_INET,
-                                       local_host=HOST,
-                                       local_port=PORT) as udp:
+    async with await create_udp_socket(
+        family=socket.AF_INET, local_host=HOST, local_port=PORT
+    ) as udp:
         now = datetime.now()
-        OUTPUT_GRP_DIR_PATH = OUTPUT_DIR_PATH / now.strftime(
-            "%Y-%m-%d_%H-%M-%S")
+        OUTPUT_GRP_DIR_PATH = OUTPUT_DIR_PATH / now.strftime("%Y-%m-%d_%H-%M-%S")
         i = 0
         if not OUTPUT_GRP_DIR_PATH.exists():
-            logger.info(
-                f"Creating output group directory: {OUTPUT_GRP_DIR_PATH}")
+            logger.info(f"Creating output group directory: {OUTPUT_GRP_DIR_PATH}")
             OUTPUT_GRP_DIR_PATH.mkdir()
         with open(OUTPUT_GRP_DIR_PATH / "cat.bin", "wb") as f:
             async for packet, (host, port) in udp:
-                logger.info(
-                    f"Received {len(packet)} bytes from {host}:{port} at {i}")
+                logger.info(f"Received {len(packet)} bytes from {host}:{port} at {i}")
                 f.write(CatHeader.pack_with_cat(packet))
                 i += 1
 
