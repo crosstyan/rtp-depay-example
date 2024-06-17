@@ -136,6 +136,29 @@ def parse_files():
             o.write(HEAD + p)
 
 
+class AggregationHeader(BaseModel):
+    ...
+
+
+# https://datatracker.ietf.org/doc/html/rfc6185#section-6.1
+# NOTE: sprop-max-don-diff
+class FragmentUnitHeader(BaseModel):
+    S: bool
+    """
+    1 bit
+    """
+    E: bool
+    """
+    1 bit
+    """
+    FuType: int
+    """
+    6 bit
+    """
+
+
+
+
 @click.command()
 @click.argument("input_file", type=click.Path(exists=True, dir_okay=False))
 def parse_cat(input_file: PathLike):
