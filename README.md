@@ -40,7 +40,7 @@ a file. For [majestic](#majestic) it should be
 [RTP](https://en.wikipedia.org/wiki/Real-time_Transport_Protocol) stream.
 - use [`decode.py`](decode.py) to decode the header of RTP stream and the
 [NAL](https://en.wikipedia.org/wiki/Network_Abstraction_Layer) units of the
-[H.265](https://en.wikipedia.org/wiki/High_Efficiency_Video_Coding) stream.
+[H.265](https://en.wikipedia.org/wiki/High_Efficiency_Video_Coding) stream and dump to a file.
 - use [`depay_cat.py`](depay_cat.py) to view each captured UDP payload.
 
 I believe
@@ -99,8 +99,11 @@ busybox netstat -l
 
 ```bash
 gst-launch-1.0 -e filesrc location=output/o.265 ! h265parse ! avdec_h265 ! videoconvert ! jpegenc ! multifilesink location=frame_%05d.jpg
-ffprobe -analyzeduration 100M -probesize 100M output/o.265
-ffmpeg -report -i output/o.265 -f null -
 h265nal output/o.265 -d > nal.txt
+ffprobe output/o.265
+ffmpeg -report -i output/o.265 -f null -
 ffmpeg -i output/o.265 -c:v copy output.mp4
+# avoid timestamp error
+# https://ffmpeg.org/ffmpeg-all.html#Video-Options
+ffmpeg -r 25 -fflags +genpts -i output/o.265 -c:v copy output.mp4
 ```
